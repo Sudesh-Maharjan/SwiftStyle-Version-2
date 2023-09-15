@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
-class HairPage extends StatelessWidget {
+class HairPage extends StatefulWidget {
+  @override
+  State<HairPage> createState() => _HairPageState();
+}
+
+class _HairPageState extends State<HairPage> {
   final List<String> hairServices = [
     "Haircut",
     "Hair Styling",
@@ -41,6 +46,9 @@ class HairPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Column(
+                    //Map function le service providers ko list lai widget ma convert garna halp garxa
+                    //ani each of the provider in serviceproviders list lai chai Widget create garxa
+
                     children: serviceProviders.map((provider) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -116,7 +124,7 @@ List<ServiceProvider> getServiceProviders(String category) {
   if (category == "Haircut") {
     return [
       ServiceProvider(
-        name: "John Doe",
+        name: "Sudesh Maharjan",
         description: "Expert in trendy haircuts",
         profileImage: "https://example.com/john_doe_profile.jpg",
       ),

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:salon/Businessaccountpages/BusinessSignUpPage.dart';
 // import 'package:salon/AuthPages/authentication.dart';
 import 'package:salon/components/my_buttons.dart';
 import 'package:salon/components/my_textfield.dart';
@@ -97,7 +98,17 @@ class _LoginPageState extends State<LoginPage> {
                   //   MaterialPageRoute(builder: (context) => BusinessSignUpPage()),
                   // );
                 },
-                child: Text('Sign up as business'),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => BusinessSignupPage()));
+                  },
+                  child: Text(
+                    'Sign up as business',
+                  ),
+                ),
               ),
             ),
           ],
