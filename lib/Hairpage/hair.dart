@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:salon/Hairpage/timeslotpage.dart';
 
 class HairPage extends StatefulWidget {
   @override
@@ -66,34 +67,13 @@ class _HairPageState extends State<HairPage> {
                             subtitle: Text(provider.description),
                             trailing: ElevatedButton(
                               onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      title: Text('Booking Confirmation'),
-                                      content: Text(
-                                        'You have selected ${provider.name}. Do you want to proceed with the booking?',
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(
-                                                context); // Close the dialog
-                                            // Perform the booking action
-                                            // Add your booking logic here
-                                          },
-                                          child: Text('Book'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(
-                                                context); // Close the dialog
-                                          },
-                                          child: Text('Cancel'),
-                                        ),
-                                      ],
-                                    );
-                                  },
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => TimeSlotPage(
+                                      serviceName: service,
+                                    ),
+                                  ),
                                 );
                               },
                               style: ElevatedButton.styleFrom(

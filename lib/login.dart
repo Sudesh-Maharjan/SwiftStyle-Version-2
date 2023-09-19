@@ -103,7 +103,9 @@ class _LoginPageState extends State<LoginPage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => BusinessSignupPage()));
+                            builder: (context) => BusinessSignupPage(
+                                  onBusinessAccountCreated: closeBusinessAlert,
+                                )));
                   },
                   child: Text(
                     'Sign up as business',
@@ -115,6 +117,10 @@ class _LoginPageState extends State<LoginPage> {
         );
       },
     );
+  }
+
+  void closeBusinessAlert() {
+    Navigator.pop(context);
   }
 
   @override

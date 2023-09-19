@@ -10,7 +10,7 @@ class RegisterPage extends StatefulWidget {
   RegisterPage({super.key, required this.onTap});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<RegisterPage> createState() => _RegisterPageState(isBusiness: false);
 }
 
 class _RegisterPageState extends State<RegisterPage> {
@@ -33,6 +33,9 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
+  final bool isBusiness;
+
+  _RegisterPageState({required this.isBusiness});
   void signUserUp() async {
     //show loading circle
     showDialog(
@@ -47,6 +50,13 @@ class _RegisterPageState extends State<RegisterPage> {
       if (passwordController.text == confirmPasswordController.text) {
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
             email: emailController.text, password: passwordController.text);
+
+        if (isBusiness) {
+          userRole = 'business';
+        } else {
+          userRole = 'user';
+        }
+
         addUserDetails(
           firstNameController.text.trim(),
           lastNameController.text.trim(),
@@ -66,6 +76,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  String userRole = 'user';
   Future addUserDetails(
       String firstName, String lastName, String email, int age) async {
     await FirebaseFirestore.instance.collection('users').add({
@@ -73,6 +84,7 @@ class _RegisterPageState extends State<RegisterPage> {
       'Last Name': lastName,
       'Email': email,
       'Age': age,
+      'role': userRole,
     });
   }
 
