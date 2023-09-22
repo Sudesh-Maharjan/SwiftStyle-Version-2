@@ -15,17 +15,44 @@ class TimeSlot {
 
 class TimeSlotPage extends StatefulWidget {
   final String serviceName;
+  final ServiceProvider
+      serviceProvider; //hair page ko serviceprovide ko name yeta recieve hunxa
 
-  TimeSlotPage({required this.serviceName});
+  TimeSlotPage(
+      {required this.serviceName,
+      required this.serviceProvider,
+      required List<String> selectedServices,
+      ServiceProvider? selectedProvider});
 
   @override
   _TimeSlotPageState createState() => _TimeSlotPageState();
 }
 
 class _TimeSlotPageState extends State<TimeSlotPage> {
+  String serviceName = ''; // Instance variable to store service name
+  String serviceProviderName = ''; // Instance variable to store provider name
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the instance variables with the values from the widget properties
+    serviceName = widget.serviceName;
+    serviceProviderName = widget.serviceProvider.name;
+  }
+
   final List<TimeSlot> timeSlots = List.generate(
-    8,
-    (index) => TimeSlot(time: '${10 + index}:00 AM'),
+    ((19 - 10) * 2) +
+        1, // Calculate the number of time slots (8:00 AM to 7:30 PM)
+    (index) {
+      final hour =
+          10 + (index ~/ 2); // Calculate the hour (10, 10, 11, 11, 12, 12, ...)
+      final minute =
+          (index % 2) * 30; // Calculate the minute (0, 30, 0, 30, 0, 30, ...)
+      final String period = hour < 12 ? 'AM' : 'PM';
+      return TimeSlot(
+          time:
+              '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period');
+    },
   );
 
   @override
@@ -90,8 +117,10 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
               SizedBox(height: 8),
               Text('Time: ${timeSlot.time}'),
               SizedBox(height: 8),
+              Text('Service Name: $serviceName'), // Display the service name
+              SizedBox(height: 8),
               Text(
-                  'Service Provider: ${timeSlot.serviceProvider?.name ?? 'N/A'}'),
+                  'Service Provider: $serviceProviderName'), // Display the provider name
             ],
           ),
           actions: [
