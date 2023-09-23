@@ -14,14 +14,17 @@ class TimeSlot {
 }
 
 class TimeSlotPage extends StatefulWidget {
-  final String serviceName;
-  final ServiceProvider
-      serviceProvider; //hair page ko serviceprovide ko name yeta recieve hunxa
-
+  // final String serviceName;
+  // final ServiceProvider
+  //     serviceProvider; //hair page ko serviceprovide ko name yeta recieve hunxa
+  final List<String> selectedServices; // List to store selected service names
+  final List<ServiceProvider> selectedProviders;
   TimeSlotPage(
-      {required this.serviceName,
-      required this.serviceProvider,
-      required List<String> selectedServices,
+      {
+      // required this.serviceName,
+      // required this.serviceProvider,
+      required this.selectedProviders,
+      required this.selectedServices,
       ServiceProvider? selectedProvider});
 
   @override
@@ -36,8 +39,9 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
   void initState() {
     super.initState();
     // Initialize the instance variables with the values from the widget properties
-    serviceName = widget.serviceName;
-    serviceProviderName = widget.serviceProvider.name;
+    serviceName = widget.selectedServices.join(', ');
+    serviceProviderName =
+        widget.selectedProviders.map((p) => p.name).join(', ');
   }
 
   final List<TimeSlot> timeSlots = List.generate(
@@ -85,6 +89,17 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
                             // Show a confirmation dialog or navigate to a confirmation page
                             showConfirmationDialog(timeSlot);
                           },
+                    style: ElevatedButton.styleFrom(
+                      // Check if the selected services contain the service related to this time slot
+                      // If it does, set the button color to red, otherwise, keep it green
+                      backgroundColor: widget.selectedServices
+                              .contains(timeSlot.serviceProvider?.name ?? '')
+                          ? Colors.red
+                          : Color.fromARGB(255, 62, 169, 158),
+                      textStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     child: Text('Book'),
                   ),
           );
@@ -117,10 +132,17 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
               SizedBox(height: 8),
               Text('Time: ${timeSlot.time}'),
               SizedBox(height: 8),
-              Text('Service Name: $serviceName'), // Display the service name
+              Text('Selected Services:'),
+              for (var service in widget.selectedServices) ...[
+                SizedBox(height: 4),
+                Text('- $service'),
+              ], // Display the provider name
               SizedBox(height: 8),
-              Text(
-                  'Service Provider: $serviceProviderName'), // Display the provider name
+              Text('Selected Service Providers:'),
+              for (var provider in widget.selectedProviders) ...[
+                SizedBox(height: 4),
+                Text('- ${provider.name}'),
+              ],
             ],
           ),
           actions: [

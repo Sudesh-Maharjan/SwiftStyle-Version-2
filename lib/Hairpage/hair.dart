@@ -14,10 +14,11 @@ class _HairPageState extends State<HairPage> {
     "Hair Extensions",
   ];
   late TimeSlot selectedTimeSlot;
-  ServiceProvider selectedProvider =
-      ServiceProvider(name: '', description: '', profileImage: '');
-  String selectedService = '';
+  // ServiceProvider selectedProviders =
+  //     ServiceProvider(name: '', description: '', profileImage: '');
+  // String selectedServices = '';
   List<String> selectedServices = [];
+  List<ServiceProvider> selectedProviders = [];
   @override
   void initState() {
     super.initState();
@@ -26,6 +27,18 @@ class _HairPageState extends State<HairPage> {
       isBooked: false,
       serviceProvider: null,
     );
+  }
+
+  void toggleSelection(ServiceProvider provider, String service) {
+    if (selectedProviders.contains(provider)) {
+      selectedProviders.remove(provider);
+      selectedServices.remove(service);
+      provider.isSelected = false;
+    } else {
+      selectedProviders.add(provider);
+      selectedServices.add(service);
+      provider.isSelected = true;
+    }
   }
 
   @override
@@ -69,10 +82,12 @@ class _HairPageState extends State<HairPage> {
                   const SizedBox(height: 8),
                   Column(
                     children: serviceProviders.map((provider) {
+                      final isSelected = selectedProviders.contains(provider) &&
+                          selectedServices.contains(service);
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Card(
-                          elevation: 2,
+                          elevation: isSelected ? 5 : 2,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -84,37 +99,18 @@ class _HairPageState extends State<HairPage> {
                             title: Text(provider.name),
                             subtitle: Text(provider.description),
                             trailing: ElevatedButton(
-                              onPressed: selectedTimeSlot.isBooked
-                                  ? null
-                                  : () {
-                                      setState(() {
-                                        selectedTimeSlot = TimeSlot(
-                                          time: 'Selected Time',
-                                          isBooked: true,
-                                          serviceProvider: provider,
-                                        );
-                                        selectedService = service;
-                                        selectedProvider = provider;
-                                      });
-                                      // Navigator.push(
-                                      //   context,
-                                      //   MaterialPageRoute(
-                                      //     builder: (context) => TimeSlotPage(
-                                      //       serviceName: selectedService,
-                                      //       serviceProvider: selectedProvider,
-                                      //       selectedServices: selectedServices,
-                                      //     ),
-                                      //   ),
-                                      // );
-                                    },
+                              onPressed: () {
+                                toggleSelection(provider, service);
+                              },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Color.fromARGB(255, 62, 169, 158),
+                                backgroundColor: isSelected
+                                    ? Colors.red
+                                    : Color.fromARGB(255, 62, 169, 158),
                                 textStyle: TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              child: Text('Select'),
+                              child: Text(isSelected ? 'Deselect' : 'Select'),
                             ),
                           ),
                         ),
@@ -133,17 +129,25 @@ class _HairPageState extends State<HairPage> {
           child: ElevatedButton(
             onPressed: () {
               // Handle the "Next" button press if needed
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TimeSlotPage(
-                    serviceName: selectedService,
-                    serviceProvider: selectedProvider,
-                    selectedServices: selectedServices,
+              if (selectedProviders.isNotEmpty) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TimeSlotPage(
+                      // serviceName: selectedServices,
+                      selectedServices: selectedServices,
+                      selectedProviders: selectedProviders,
+                    ),
                   ),
-                ),
-              );
+                );
+              } else {
+                //Show msg or prevent navigation if no services are selected
+              }
             },
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                textStyle: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
             child: const Text(
               'Next',
             ),
@@ -211,10 +215,12 @@ class ServiceProvider {
   final String name;
   final String description;
   final String profileImage;
+  bool isSelected;
 
   ServiceProvider({
     required this.name,
     required this.description,
     required this.profileImage,
+    this.isSelected = false,
   });
 }
