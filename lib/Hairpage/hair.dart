@@ -282,4 +282,10 @@ class ServiceProvider {
     this.isSelected = false,
     required this.price,
   });
+
+  get serviceProvider => null;
+
+  get serviceName => null;
+
+  get services => null;
 }

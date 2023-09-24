@@ -63,6 +63,7 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.black,
         title: Text('Select a Time Slot'),
       ),
       body: ListView.builder(
@@ -119,17 +120,37 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
     );
   }
 
+//function to calculate total price of the selected service
+  // double calculateTotalPrice() {
+  //   double totalPrice = 0;
+  //   for (var selectedServiceName in widget.selectedServices) {
+  //     for (var provider in widget.selectedProviders) {
+  //       if (serviceName == selectedServiceName) {
+  //         totalPrice += provider.price;
+  //       }
+  //     }
+  //   }
+  //   return totalPrice;
+  // }
+  bool isBookingConfirmed = false; // Track booking confirmation status
   void showConfirmationDialog(TimeSlot timeSlot) {
+    // double totalPrice = calculateTotalPrice();
+
     showDialog(
       context: context,
       builder: (context) {
+        // Calculate the total price
+        double totalPrice = 0.0;
+        for (var pricee in widget.selectedProviders) {
+          totalPrice += pricee.price;
+        }
         return AlertDialog(
           title: Text('Booking Confirmation'),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('You have selected a time slot:'),
+              Text('You have selected a time:'),
               SizedBox(height: 8),
               Text('Time: ${timeSlot.time}'),
               SizedBox(height: 8),
@@ -144,6 +165,21 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
                 SizedBox(height: 4),
                 Text('- ${provider.name}'),
               ],
+              SizedBox(
+                height: 8,
+              ),
+              Text('Price:'),
+              for (var pricee in widget.selectedProviders) ...[
+                Text('- ${pricee.price}'),
+              ],
+              SizedBox(
+                height: 8,
+              ),
+              Text(
+                'Total Price: $totalPrice',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              //Total price
             ],
           ),
           actions: [
@@ -152,6 +188,31 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
                 Navigator.pop(context); // Close the dialog
               },
               child: Text('Close'),
+            ),
+            ElevatedButton(
+              onPressed: isBookingConfirmed
+                  ? null
+                  : () {
+                      // Handle booking confirmation logic here
+                      // Mark the time slot as booked and assign the service provider
+                      setState(() {
+                        timeSlot.isBooked = true;
+                        timeSlot.serviceProvider =
+                            getAvailableServiceProvider();
+                        isBookingConfirmed = true;
+                      });
+                      Navigator.pop(context); // Close the dialog
+                    },
+              style: ElevatedButton.styleFrom(
+                // Customize the button style
+                backgroundColor: Colors.green, // Change the button color
+                textStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              child: Text(
+                isBookingConfirmed ? 'Booking Confirmed' : 'Confirm Booking',
+              ), // Button label
             ),
           ],
         );
