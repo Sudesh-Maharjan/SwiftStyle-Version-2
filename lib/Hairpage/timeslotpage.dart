@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:salon/Hairpage/hair.dart';
 
@@ -120,30 +122,22 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
     );
   }
 
-//function to calculate total price of the selected service
-  // double calculateTotalPrice() {
-  //   double totalPrice = 0;
-  //   for (var selectedServiceName in widget.selectedServices) {
-  //     for (var provider in widget.selectedProviders) {
-  //       if (serviceName == selectedServiceName) {
-  //         totalPrice += provider.price;
-  //       }
-  //     }
-  //   }
-  //   return totalPrice;
-  // }
   bool isBookingConfirmed = false; // Track booking confirmation status
-  void showConfirmationDialog(TimeSlot timeSlot) {
-    // double totalPrice = calculateTotalPrice();
+  Future<void> showConfirmationDialog(TimeSlot timeSlot) async {
+    // Calculate the total price
+    double totalPrice = 0.0;
+    for (var pricee in widget.selectedProviders) {
+      totalPrice += pricee.price;
+    }
+    // Get the user's name from Firebase Authentication
+    final user = FirebaseAuth.instance.currentUser;
+    final userName = user != null ? user.displayName : 'Unknown User';
 
     showDialog(
       context: context,
       builder: (context) {
-        // Calculate the total price
-        double totalPrice = 0.0;
-        for (var pricee in widget.selectedProviders) {
-          totalPrice += pricee.price;
-        }
+        //yo data firebase ma store garna ko lagi
+
         return AlertDialog(
           title: Text('Booking Confirmation'),
           content: Column(
@@ -192,7 +186,7 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
             ElevatedButton(
               onPressed: isBookingConfirmed
                   ? null
-                  : () {
+                  : () async {
                       // Handle booking confirmation logic here
                       // Mark the time slot as booked and assign the service provider
                       setState(() {
@@ -201,6 +195,35 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
                             getAvailableServiceProvider();
                         isBookingConfirmed = true;
                       });
+
+                      //datastore in firestore yeta
+                      try {
+                        await FirebaseFirestore.instance
+                            .collection('user_servicebookedinfo')
+                            .add({
+                          'UserName': userName,
+                          'timeSlot': timeSlot.time,
+                          'selectedServices': widget.selectedServices,
+                          'selectedProviders': widget.selectedProviders
+                              .map((p) => p.name)
+                              .toList(),
+                          'totalPrice': totalPrice,
+                          // Add any other relevant data you want to store
+                        });
+
+                        setState(() {
+                          timeSlot.isBooked = true;
+                          timeSlot.serviceProvider =
+                              getAvailableServiceProvider();
+                          isBookingConfirmed = true;
+                        });
+
+                        Navigator.pop(context); // Close the dialog
+                      } catch (e) {
+                        // Handle errors
+                        print('Error: $e');
+                        // You can show an error message to the user or handle the error in another way
+                      }
                       Navigator.pop(context); // Close the dialog
                     },
               style: ElevatedButton.styleFrom(
