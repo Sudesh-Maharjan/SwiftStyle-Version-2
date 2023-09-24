@@ -19,6 +19,7 @@ class _HairPageState extends State<HairPage> {
   // String selectedServices = '';
   List<String> selectedServices = [];
   List<ServiceProvider> selectedProviders = [];
+  Map<String, ServiceProvider?> selectedProviderMap = {};
   @override
   void initState() {
     super.initState();
@@ -29,16 +30,33 @@ class _HairPageState extends State<HairPage> {
     );
   }
 
-  void toggleSelection(ServiceProvider provider, String service) {
-    if (selectedProviders.contains(provider)) {
-      selectedProviders.remove(provider);
-      selectedServices.remove(service);
-      provider.isSelected = false;
-    } else {
-      selectedProviders.add(provider);
-      selectedServices.add(service);
-      provider.isSelected = true;
-    }
+  void toggleSelection(
+      ServiceProvider provider, String service, bool isSelected) {
+    setState(() {
+      if (isSelected) {
+        if (selectedProviderMap.containsKey(service)) {
+          selectedProviderMap.remove(service); //service deselect
+        } else {
+          selectedProviderMap[service] = provider; // service select
+        }
+      }
+      // Update isSelected property provider ko
+      provider.isSelected = selectedProviderMap.containsKey(service);
+
+      // Update selectedProviders and selectedServices
+      selectedProviders.clear();
+      selectedServices.clear();
+
+      for (final entry in selectedProviderMap.entries) {
+        final service = entry.key;
+        final provider = entry.value;
+
+        if (provider != null) {
+          selectedProviders.add(provider);
+          selectedServices.add(service);
+        }
+      }
+    });
   }
 
   @override
@@ -90,28 +108,56 @@ class _HairPageState extends State<HairPage> {
                           elevation: isSelected ? 5 : 2,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
+                            // Apply different background colors or borders based on isSelected
+                            side: isSelected
+                                ? BorderSide(
+                                    color: Colors.green, // Selected color
+                                    width: 2.0,
+                                  )
+                                : BorderSide.none, // No border for unselected
                           ),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundImage:
-                                  NetworkImage(provider.profileImage),
-                            ),
-                            title: Text(provider.name),
-                            subtitle: Text(provider.description),
-                            trailing: ElevatedButton(
-                              onPressed: () {
-                                toggleSelection(provider, service);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isSelected
-                                    ? Colors.red
-                                    : Color.fromARGB(255, 62, 169, 158),
-                                textStyle: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                          child: CheckboxListTile(
+                            value: provider.isSelected,
+                            onChanged: (bool? newValue) {
+                              toggleSelection(provider, service, newValue!);
+                            },
+                            title: Text(
+                              provider.name,
+                              style: TextStyle(
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                // Apply different text styles based on isSelected
+                                color: isSelected ? Colors.green : Colors.black,
                               ),
-                              child: Text(isSelected ? 'Deselect' : 'Select'),
                             ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  provider.description,
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? Colors.green
+                                        : Colors.black,
+                                  ),
+                                ),
+                                Text(
+                                  'Price: \$${provider.price}',
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? Colors.green
+                                        : Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            secondary: isSelected
+                                ? Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
+                                  )
+                                : null,
                           ),
                         ),
                       );
@@ -129,14 +175,18 @@ class _HairPageState extends State<HairPage> {
           child: ElevatedButton(
             onPressed: () {
               // Handle the "Next" button press if needed
-              if (selectedProviders.isNotEmpty) {
+              final selectedProvidersList = selectedProviderMap.values
+                  .where((provider) => provider != null)
+                  .cast<ServiceProvider>()
+                  .toList();
+              if (selectedProvidersList.isNotEmpty) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => TimeSlotPage(
                       // serviceName: selectedServices,
                       selectedServices: selectedServices,
-                      selectedProviders: selectedProviders,
+                      selectedProviders: selectedProvidersList,
                     ),
                   ),
                 );
@@ -165,11 +215,13 @@ List<ServiceProvider> getServiceProviders(String category) {
         name: "Sudesh Maharjan",
         description: "Expert in trendy haircuts",
         profileImage: "https://example.com/john_doe_profile.jpg",
+        price: 150,
       ),
       ServiceProvider(
         name: "Jane Smith",
         description: "Specializes in men's haircuts",
         profileImage: "https://example.com/jane_smith_profile.jpg",
+        price: 200,
       ),
     ];
   } else if (category == "Hair Styling") {
@@ -178,6 +230,7 @@ List<ServiceProvider> getServiceProviders(String category) {
         name: "Emily Johnson",
         description: "Creates stunning hairstyles",
         profileImage: "https://example.com/emily_johnson_profile.jpg",
+        price: 100,
       ),
     ];
   } else if (category == "Hair Coloring") {
@@ -186,11 +239,13 @@ List<ServiceProvider> getServiceProviders(String category) {
         name: "Michael Brown",
         description: "Master of hair coloring techniques",
         profileImage: "https://example.com/michael_brown_profile.jpg",
+        price: 150,
       ),
       ServiceProvider(
         name: "Sophia Davis",
         description: "Offers creative hair coloring solutions",
         profileImage: "https://example.com/sophia_davis_profile.jpg",
+        price: 200,
       ),
     ];
   } else if (category == "Hair Extensions") {
@@ -199,11 +254,13 @@ List<ServiceProvider> getServiceProviders(String category) {
         name: "William Wilson",
         description: "Specializes in hair extensions",
         profileImage: "https://example.com/william_wilson_profile.jpg",
+        price: 250,
       ),
       ServiceProvider(
         name: "Olivia Martinez",
         description: "Provides high-quality hair extensions",
         profileImage: "https://example.com/olivia_martinez_profile.jpg",
+        price: 300,
       ),
     ];
   }
@@ -216,11 +273,13 @@ class ServiceProvider {
   final String description;
   final String profileImage;
   bool isSelected;
+  final int price;
 
   ServiceProvider({
     required this.name,
     required this.description,
     required this.profileImage,
     this.isSelected = false,
+    required this.price,
   });
 }

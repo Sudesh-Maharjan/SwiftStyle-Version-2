@@ -115,6 +115,7 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
       name: 'Selected Provider',
       description: 'Provider Description',
       profileImage: 'Provider Image URL',
+      price: 100,
     );
   }
 
