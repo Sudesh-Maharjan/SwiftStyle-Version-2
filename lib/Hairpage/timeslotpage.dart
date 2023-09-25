@@ -1,17 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:salon/CheckoutPages/Checkout.dart';
 import 'package:salon/Hairpage/hair.dart';
 
 class TimeSlot {
   final String time;
   bool isBooked;
   ServiceProvider? serviceProvider;
+  bool isConfirming; //timseslot ko select time button track garnako lagi
 
   TimeSlot({
     required this.time,
     this.isBooked = false,
     this.serviceProvider,
+    this.isConfirming = false,
   });
 }
 
@@ -37,6 +40,9 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
   String serviceName = ''; // Instance variable to store service name
   String serviceProviderName = ''; // Instance variable to store provider name
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  List<String> bookedTimeSlots = []; // store garxa list of booked time slots
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +50,28 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
     serviceName = widget.selectedServices.join(', ');
     serviceProviderName =
         widget.selectedProviders.map((p) => p.name).join(', ');
+    loadBookedTimeSlots();
+  }
+
+// Load the list of booked time slots from Firestore
+  void loadBookedTimeSlots() {
+    // Replace 'your_collection_name' with the actual Firestore collection name
+    FirebaseFirestore.instance
+        .collection('user_servicebookedinfo')
+        .get()
+        .then((querySnapshot) {
+      final List<String> timeSlots = [];
+      querySnapshot.docs.forEach((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        final timeSlot = data['timeSlot'] as String;
+        timeSlots.add(timeSlot);
+      });
+
+      // Update the list of booked time slots in the app state
+      setState(() {
+        bookedTimeSlots = timeSlots;
+      });
+    });
   }
 
   final List<TimeSlot> timeSlots = List.generate(
@@ -64,6 +92,7 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: Text('Select a Time Slot'),
@@ -72,39 +101,52 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
         itemCount: timeSlots.length,
         itemBuilder: (context, index) {
           final timeSlot = timeSlots[index];
+          final isTimeSlotBooked = bookedTimeSlots.contains(timeSlot.time);
           return ListTile(
             title: Text(timeSlot.time),
-            trailing: timeSlot.isBooked
-                ? Text('Booked')
-                : ElevatedButton(
-                    onPressed: timeSlot.isBooked
-                        ? null
-                        : () {
-                            // Handle booking logic here
-                            // You can set timeSlot.isBooked to true and assign the serviceProvider
-                            // Once booked, you should update the UI accordingly
-                            setState(() {
-                              timeSlot.isBooked = true;
-                              timeSlot.serviceProvider =
-                                  getAvailableServiceProvider();
-                            });
+            trailing:
+                //  timeSlot.isBooked
+                //     ? Text('Selected')
+                //     :
+                ElevatedButton(
+              onPressed:
+                  isTimeSlotBooked || timeSlot.isBooked || timeSlot.isConfirming
+                      ? null
+                      : () {
+                          // Handle booking logic here
+                          // You can set timeSlot.isBooked to true and assign the serviceProvider
+                          // Once booked, you should update the UI accordingly
+                          setState(() {
+                            timeSlot.isBooked = true;
+                            timeSlot.serviceProvider =
+                                getAvailableServiceProvider();
+                            timeSlot.isConfirming = false;
+                          });
 
-                            // Show a confirmation dialog or navigate to a confirmation page
-                            showConfirmationDialog(timeSlot);
-                          },
-                    style: ElevatedButton.styleFrom(
-                      // Check if the selected services contain the service related to this time slot
-                      // If it does, set the button color to red, otherwise, keep it green
-                      backgroundColor: widget.selectedServices
-                              .contains(timeSlot.serviceProvider?.name ?? '')
-                          ? Colors.red
-                          : Color.fromARGB(255, 62, 169, 158),
-                      textStyle: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    child: Text('Book'),
-                  ),
+                          // Show a confirmation dialog or navigate to a confirmation page
+                          showConfirmationDialog(timeSlot);
+                        },
+              style: ElevatedButton.styleFrom(
+                // Check if the selected services contain the service related to this time slot
+                // If it does, set the button color to red, otherwise, keep it green
+                backgroundColor: widget.selectedServices
+                        .contains(timeSlot.serviceProvider?.name ?? '')
+                    ? Colors.red
+                    : Color.fromARGB(255, 62, 169, 158),
+                textStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              child: Text(
+                isTimeSlotBooked
+                    ? 'Already Booked' //booked display hunxa if the time slot is already booked
+                    : timeSlot.isBooked
+                        ? 'Selected'
+                        : timeSlot.isConfirming
+                            ? 'Confirm booking'
+                            : 'Select',
+              ),
+            ),
           );
         },
       ),
@@ -194,6 +236,8 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
                         timeSlot.serviceProvider =
                             getAvailableServiceProvider();
                         isBookingConfirmed = true;
+                        timeSlot.isConfirming =
+                            false; //confirm button preee vaisakexe, timeslot confirm hunxa
                       });
 
                       //datastore in firestore yeta
@@ -219,12 +263,30 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
                         });
 
                         Navigator.pop(context); // Close the dialog
+                        final snackBar = SnackBar(
+                          content: Text('You have selected a time slot'),
+                          duration: Duration(
+                              seconds:
+                                  6), // notification ko duration set gareko
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } catch (e) {
                         // Handle errors
                         print('Error: $e');
                         // You can show an error message to the user or handle the error in another way
                       }
                       Navigator.pop(context); // Close the dialog
+                      // Show the checkout page with booking details
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CheckoutPage(
+                            selectedServices: widget.selectedServices,
+                            selectedProviders: widget.selectedProviders,
+                            totalPrice: totalPrice,
+                          ),
+                        ),
+                      );
                     },
               style: ElevatedButton.styleFrom(
                 // Customize the button style
@@ -234,7 +296,7 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
                 ),
               ),
               child: Text(
-                isBookingConfirmed ? 'Booking Confirmed' : 'Confirm Booking',
+                isBookingConfirmed ? 'Service Info saved' : 'Checkout',
               ), // Button label
             ),
           ],

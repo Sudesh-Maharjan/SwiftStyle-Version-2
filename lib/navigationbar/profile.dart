@@ -3,6 +3,48 @@ import 'package:flutter/material.dart';
 
 class ProfilePage extends StatelessWidget {
   final user = FirebaseAuth.instance.currentUser!;
+//function confirmation dialog show garauna ko lagi to dofirm deleting account
+  Future<void> _showConfirmationDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Delete'),
+          content: Text(
+              'Are you sure you want to delete your account? This action cannot be undone.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: TextStyle(color: Colors.red),
+              ),
+              child: Text('Delete', style: TextStyle(color: Colors.red)),
+              onPressed: () async {
+                // Add code here to delete the user account using Firebase Auth
+                // For example:
+                try {
+                  await user.delete();
+                  Navigator.of(context).pop(); // Close the dialog
+                  // You can also navigate the user to a sign-in screen or any other screen after deletion.
+                } catch (e) {
+                  // Handle errors here
+                  print('Error deleting account: $e');
+                  // You can display an error message to the user here
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,6 +115,21 @@ class ProfilePage extends StatelessWidget {
                 subtitle: Text('Country'),
               ),
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () {
+              _showConfirmationDialog(context);
+            },
+            child: Text(
+              'Delete Account',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ),
       ),
