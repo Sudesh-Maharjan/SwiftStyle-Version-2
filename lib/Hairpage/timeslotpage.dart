@@ -89,6 +89,15 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
     },
   );
 
+//reset the selected when the close button is pressed
+  void resetTimeSlotSelection(TimeSlot timeSlot) {
+    setState(() {
+      timeSlot.isBooked = false;
+      timeSlot.serviceProvider = null;
+      timeSlot.isConfirming = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -177,6 +186,8 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
 
     showDialog(
       context: context,
+      barrierDismissible:
+          false, //Prevent dismissing by tapping outside the dialog
       builder: (context) {
         //yo data firebase ma store garna ko lagi
 
@@ -221,6 +232,7 @@ class _TimeSlotPageState extends State<TimeSlotPage> {
           actions: [
             TextButton(
               onPressed: () {
+                resetTimeSlotSelection(timeSlot);
                 Navigator.pop(context); // Close the dialog
               },
               child: Text('Close'),

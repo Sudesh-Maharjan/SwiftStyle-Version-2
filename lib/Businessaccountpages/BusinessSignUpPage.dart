@@ -41,7 +41,7 @@ class _BusinessSignupPageState extends State<BusinessSignupPage> {
 
         // Store additional user data in Firestore
         await FirebaseFirestore.instance
-            .collection('businesses')
+            .collection('businesses_user_info')
             .doc(userCredential.user!.uid)
             .set({
           'email': _bemailController.text,
@@ -52,7 +52,11 @@ class _BusinessSignupPageState extends State<BusinessSignupPage> {
           'BusinessLocation': _blocationController.text
         });
         widget.onBusinessAccountCreated();
+
         // Navigate to the home page after successful signup
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => AuthPageBusiness(),
+        ));
       } else {
         // Display an error message using SnackBar
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
