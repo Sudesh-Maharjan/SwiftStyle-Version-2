@@ -1,9 +1,106 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
   final user = FirebaseAuth.instance.currentUser!;
-//function confirmation dialog show garauna ko lagi to dofirm deleting account
+  // final TextEditingController firstNameController = TextEditingController();
+  // final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController phoneNumberController = TextEditingController();
+  final TextEditingController dobController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+
+  // late String? firstName;
+  // late String? lastName;
+  bool isDataSaved = false;
+  @override
+  void initState() {
+    super.initState();
+
+    // Fetch local data if available
+    fetchLocalData();
+
+    // Fetch user profile data from Firestore
+    fetchUserData().then((userData) {
+      setState(() {
+        phoneNumberController.text = userData['phoneNumber'] ?? '';
+        dobController.text = userData['dateOfBirth'] ?? '';
+        addressController.text = userData['address'] ?? '';
+      });
+    });
+  }
+
+  Future<void> fetchLocalData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    phoneNumberController.text = prefs.getString('phoneNumber') ?? '';
+    dobController.text = prefs.getString('dateOfBirth') ?? '';
+    addressController.text = prefs.getString('address') ?? '';
+  }
+
+  Future<void> saveLocalData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('phoneNumber', phoneNumberController.text);
+    prefs.setString('dateOfBirth', dobController.text);
+    prefs.setString('address', addressController.text);
+  }
+
+  Future<Map<String, dynamic>> fetchUserData() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Fetch user profile data from Firestore
+        final userDoc = await FirebaseFirestore.instance
+            .collection('user_profile_data')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          final userData = userDoc.data() as Map<String, dynamic>;
+          return userData;
+        }
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
+    return {};
+  }
+
+  Future<void> saveUserData() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final userData = {
+          'email': user.email,
+          'phoneNumber': phoneNumberController.text,
+          'dateOfBirth': dobController.text,
+          'address': addressController.text,
+        };
+
+        // Update user profile data in Firestore
+        await FirebaseFirestore.instance
+            .collection('user_profile_data')
+            .doc(user.uid)
+            .set(userData);
+
+        // Show a success message or perform other actions
+        setState(() {
+          isDataSaved = true;
+        });
+        // Save data locally
+        saveLocalData();
+      }
+    } catch (e) {
+      print('Error saving user data: $e');
+      // Handle errors here
+    }
+  }
+
   Future<void> _showConfirmationDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
@@ -46,9 +143,20 @@ class ProfilePage extends StatelessWidget {
   }
 
   @override
+  void dispose() {
+    // Dispose of text controllers when done
+
+    phoneNumberController.dispose();
+    dobController.dispose();
+    addressController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.black,
         title: const Text('Profile'),
       ),
       body: SingleChildScrollView(
@@ -63,14 +171,6 @@ class ProfilePage extends StatelessWidget {
                     NetworkImage('https://example.com/profile_image.jpg'),
               ),
               const SizedBox(height: 16.0),
-              const Text(
-                'John Doe',
-                style: TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8.0),
               Text(
                 user.email!,
                 style: const TextStyle(
@@ -89,14 +189,20 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8.0),
-              const ListTile(
-                leading: Icon(Icons.phone),
-                title: Text('+1 123 456 7890'),
+              TextFormField(
+                controller: phoneNumberController,
+                decoration: InputDecoration(
+                  labelText: 'Phone Number',
+                  prefixIcon: Icon(Icons.phone),
+                ),
               ),
-              const ListTile(
-                leading: Icon(Icons.calendar_today),
-                title: Text('Date of Birth'),
-                subtitle: Text('January 1, 1990'),
+              const SizedBox(height: 8.0),
+              TextFormField(
+                controller: dobController,
+                decoration: InputDecoration(
+                  labelText: 'Date of Birth',
+                  prefixIcon: Icon(Icons.calendar_today),
+                ),
               ),
               const SizedBox(height: 16.0),
               const Divider(),
@@ -109,11 +215,27 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8.0),
-              const ListTile(
-                leading: Icon(Icons.location_on),
-                title: Text('123 Main St, City'),
-                subtitle: Text('Country'),
+              TextFormField(
+                controller: addressController,
+                decoration: InputDecoration(
+                  labelText: 'Address',
+                  prefixIcon: Icon(Icons.location_on),
+                ),
               ),
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: () {
+                  saveUserData();
+                },
+                child: Text('Save'),
+              ),
+              if (isDataSaved) // Display confirmation message when data is saved
+                const Text(
+                  'Information has been saved.',
+                  style: TextStyle(
+                    color: Colors.green,
+                  ),
+                ),
             ],
           ),
         ),

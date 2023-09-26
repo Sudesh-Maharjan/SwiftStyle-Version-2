@@ -1,14 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:salon/AuthPages/authentication.dart';
 import 'package:salon/Businessaccountpages/BusinessSignUpPage.dart';
 import 'package:salon/Businessaccountpages/Login_business.dart';
 import 'package:salon/components/my_buttons.dart';
 import 'package:salon/components/my_textfield.dart';
 import 'package:salon/components/square_tile.dart';
-import 'package:salon/home.dart';
-
-import 'Businessaccountpages/BusinessHomePage.dart';
 
 class LoginPage extends StatefulWidget {
   final Function()? onTap;
@@ -168,14 +166,14 @@ class _LoginPageState extends State<LoginPage> {
           // Navigate to the user home screen
           print('User logged in');
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => HomePage()));
+              context, MaterialPageRoute(builder: (context) => AuthPage()));
         } else if (userType == 'business') {
           // Navigate to the business home screen
           print('Business logged in');
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => BusinessHomeScreen()));
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => AuthPage()));
         } else {
-          //vayena vani error msg yeta shoe garni
+          //vayena vani error msg yeta show garni
           print('Unknown user type');
         }
       } else {

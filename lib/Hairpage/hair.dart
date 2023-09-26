@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:salon/Hairpage/timeslotpage.dart';
 
@@ -20,15 +21,54 @@ class _HairPageState extends State<HairPage> {
   List<String> selectedServices = [];
   List<ServiceProvider> selectedProviders = [];
   Map<String, ServiceProvider?> selectedProviderMap = {};
+  List<Service> hairServicesData = [];
   @override
   void initState() {
     super.initState();
+    // fetchData();
     selectedTimeSlot = TimeSlot(
       time: 'Default Time',
       isBooked: false,
       serviceProvider: null,
     );
   }
+
+  Future<List<Service>> fetchHairServices() async {
+    final CollectionReference serviceCollection =
+        FirebaseFirestore.instance.collection('service_added_data');
+
+    try {
+      QuerySnapshot snapshot = await serviceCollection.get();
+      List<Service> services = [];
+
+      for (QueryDocumentSnapshot doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        // Check if the fetched service matches one of the predefined categories
+        if (hairServices.contains(data['serviceName'])) {
+          services.add(Service(
+            serviceName: data['serviceName'],
+            description: data['description'],
+            price: data['price'],
+          ));
+        }
+      }
+
+      return services;
+    } catch (e) {
+      print('Error fetching service providers: $e');
+      return [];
+    }
+  }
+  // Future<void> fetchData() async {
+  //   try {
+  //     final services = await DataService.fetchHairServices();
+  //     setState(() {
+  //       HairServices = services;
+  //     });
+  //   } catch (e) {
+  //     print('Error fetching data: $e');
+  //   }
+  // }
 
   void toggleSelection(
       ServiceProvider provider, String service, bool isSelected) {
@@ -288,4 +328,22 @@ class ServiceProvider {
   get serviceName => null;
 
   get services => null;
+}
+
+class Service {
+  final String serviceName;
+  final String description;
+  final int price;
+
+  Service({
+    required this.serviceName,
+    required this.description,
+    required this.price,
+  });
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: HairPage(),
+  ));
 }
