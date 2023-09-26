@@ -11,6 +11,10 @@ class LoginOrRegisterPage extends StatefulWidget {
 
 class _LoginOrRegisterPageState extends State<LoginOrRegisterPage> {
   bool showLoginPage = true;
+  void onUsersAccountCreated() {
+    // Add your logic here
+    print('User account created'); // Example logic
+  }
 
   //toggle between login and register
   void togglePages() {
@@ -28,6 +32,7 @@ class _LoginOrRegisterPageState extends State<LoginOrRegisterPage> {
     } else {
       return RegisterPage(
         onTap: togglePages,
+        onUsersAccountCreated: onUsersAccountCreated,
       );
     }
   }

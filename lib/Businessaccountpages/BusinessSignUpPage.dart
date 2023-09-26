@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:salon/Businessaccountpages/authnticationbusiness.dart';
+import 'package:salon/AuthPages/authentication.dart';
 // import 'package:salon/login.dart';
 
 typedef void OnBusinessAccountCreated();
@@ -36,7 +36,7 @@ class _BusinessSignupPageState extends State<BusinessSignupPage> {
           password: _bpasswordController.text,
         );
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => AuthPageBusiness(),
+          builder: (context) => AuthPage(),
         ));
 
         // Store additional user data in Firestore
@@ -55,7 +55,7 @@ class _BusinessSignupPageState extends State<BusinessSignupPage> {
 
         // Navigate to the home page after successful signup
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => AuthPageBusiness(),
+          builder: (context) => AuthPage(),
         ));
       } else {
         // Display an error message using SnackBar
@@ -103,7 +103,7 @@ class _BusinessSignupPageState extends State<BusinessSignupPage> {
 
   Future addBusinessUserDetails(
       String firstName, String lastName, String email, String location) async {
-    await FirebaseFirestore.instance.collection('Business account users').add({
+    await FirebaseFirestore.instance.collection('businesses_user_info').add({
       'First Name': firstName,
       'Last Name': lastName,
       'Email': email,

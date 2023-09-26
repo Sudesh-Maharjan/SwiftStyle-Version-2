@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:salon/Businessaccountpages/BusinessHomePage.dart';
+import 'package:salon/AuthPages/authentication.dart';
 
 class BusinessLoginPage extends StatefulWidget {
   @override
@@ -78,7 +78,7 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
             // For example, you can navigate to BusinessHomePage:
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (context) => BusinessHomePage(),
+                builder: (context) => AuthPage(),
               ),
             );
           } else {

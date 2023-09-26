@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:salon/Businessaccountpages/BusinessSignUpPage.dart';
@@ -5,6 +6,9 @@ import 'package:salon/Businessaccountpages/Login_business.dart';
 import 'package:salon/components/my_buttons.dart';
 import 'package:salon/components/my_textfield.dart';
 import 'package:salon/components/square_tile.dart';
+import 'package:salon/home.dart';
+
+import 'Businessaccountpages/BusinessHomePage.dart';
 
 class LoginPage extends StatefulWidget {
   final Function()? onTap;
@@ -19,40 +23,6 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
 
   final passwordController = TextEditingController();
-
-  void signUserIn() async {
-    //show loading circle
-    showDialog(
-        context: context,
-        builder: (context) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        });
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: emailController.text, password: passwordController.text);
-      //pop the loading circle
-      Navigator.pop(context);
-    } on FirebaseAuthException catch (e) {
-      //pop the loading circle
-      Navigator.pop(context);
-      showerrormessage(e.code);
-    }
-  }
-
-//wrong email message popup
-  void showerrormessage(String message) {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(
-              message,
-            ),
-          );
-        });
-  }
 
   void showBusinessAlert() {
     showDialog(
@@ -149,6 +119,74 @@ class _LoginPageState extends State<LoginPage> {
 
   void closeBusinessAlert() {
     Navigator.pop(context);
+  }
+
+  Future<String?> getUserType(User? user) async {
+    if (user != null) {
+      try {
+        final firestore = FirebaseFirestore.instance;
+
+        // Check if the user document exists in 'users' collection
+        final userDoc = await firestore.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          return 'user';
+        }
+
+        // Check if the user document exists in 'businesses_user_info' collection
+        final businessUserDoc = await firestore
+            .collection('businesses_user_info')
+            .doc(user.uid)
+            .get();
+        if (businessUserDoc.exists) {
+          return 'business';
+        }
+      } catch (e) {
+        print('Error getting user type: $e');
+        return null;
+      }
+    }
+    return null;
+  }
+
+  void signUserIn() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    try {
+      final authResult = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final user = authResult.user;
+
+      if (user != null) {
+        // User successfully signed in, now check their user type
+        final userType = await getUserType(user);
+
+        if (userType == 'user') {
+          // Navigate to the user home screen
+          print('User logged in');
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => HomePage()));
+        } else if (userType == 'business') {
+          // Navigate to the business home screen
+          print('Business logged in');
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => BusinessHomeScreen()));
+        } else {
+          //vayena vani error msg yeta shoe garni
+          print('Unknown user type');
+        }
+      } else {
+        //null case lai yeta show garne
+        print('User is null');
+      }
+    } catch (e) {
+      // Handle authentication errors (e.g., invalid credentials)
+      // You can show an error message or take appropriate action here
+      print('Error signing in: $e');
+    }
   }
 
   @override
