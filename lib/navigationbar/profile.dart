@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:salon/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -123,17 +124,37 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               child: Text('Delete', style: TextStyle(color: Colors.red)),
               onPressed: () async {
-                // Add code here to delete the user account using Firebase Auth
-                // For example:
-                try {
-                  await user.delete();
-                  Navigator.of(context).pop(); // Close the dialog
-                  // You can also navigate the user to a sign-in screen or any other screen after deletion.
-                } catch (e) {
-                  // Handle errors here
-                  print('Error deleting account: $e');
-                  // You can display an error message to the user here
+                //current user firestore bata leko
+                final user = FirebaseAuth.instance.currentUser;
+                //delete account using Firebase Auth
+                if (user != null) {
+                  //null vayena vani matrai try block ma janxa
+                  try {
+                    //user lai delete gareko
+                    await user.delete();
+                    //user ko document delete gareko
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid)
+                        .delete();
+                    //Signout farako
+                    await FirebaseAuth.instance.signOut();
+
+                    Navigator.of(context)
+                        .pop(ProfilePage()); // Close the dialog
+                    Navigator.of(context)
+                        .pop(ProfilePage()); // Close the dialog
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (context) => LoginPage(
+                        onTap: () {},
+                      ),
+                    ));
+                  } catch (e) {
+                    // Handle errors here
+                    print('Error deleting account: $e');
+                  }
                 }
+                ;
               },
             ),
           ],
@@ -191,7 +212,7 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 8.0),
               TextFormField(
                 controller: phoneNumberController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Phone Number',
                   prefixIcon: Icon(Icons.phone),
                 ),
@@ -199,7 +220,7 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 8.0),
               TextFormField(
                 controller: dobController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Date of Birth',
                   prefixIcon: Icon(Icons.calendar_today),
                 ),
@@ -217,7 +238,7 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 8.0),
               TextFormField(
                 controller: addressController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Address',
                   prefixIcon: Icon(Icons.location_on),
                 ),
@@ -227,7 +248,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 onPressed: () {
                   saveUserData();
                 },
-                child: Text('Save'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      Colors.black, // Set the background color here
+                ),
+                child: const Text(
+                  'Save',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
               if (isDataSaved) // Display confirmation message when data is saved
                 const Text(

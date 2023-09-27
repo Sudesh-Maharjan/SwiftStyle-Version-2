@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:salon/AuthPages/authentication.dart';
 import 'package:salon/components/my_textfield.dart';
-import 'package:salon/components/square_tile.dart';
 
 typedef void onUsersAccountCreated();
 
@@ -63,32 +62,53 @@ class _RegisterPageState extends State<RegisterPage> {
         ));
       }
     } on FirebaseAuthException catch (e) {
-      Navigator.pop(context);
       showerrormessageregister(e.code);
     }
   }
 
   void showerrormessageregister(String message) {
     showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
+      context: context,
+      builder: (context) {
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).pop();
+          },
+          child: AlertDialog(
             title: Text(
               message,
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 
   bool _validateRegisterInput() {
+    //empty eroor handel gareko
     if (emailController.text.isEmpty ||
         passwordController.text.isEmpty ||
         confirmPasswordController.text.isEmpty ||
         firstNameController.text.isEmpty ||
         lastNameController.text.isEmpty ||
         ageController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: const Text('Please fill in all required fields.'),
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Please fill in all required fields.'),
+      ));
+      return false;
+    }
+    //first name ra last name lai character check gareko
+    if (firstNameController.text.length <= 3 ||
+        lastNameController.text.length <= 3) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+            "First name and last name should have more than 3 characters. "),
+      ));
+      return false;
+    }
+    if (ageController.text.length > 2) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Age should have 2 or fewer digits."),
       ));
       return false;
     }
@@ -149,7 +169,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   //   MaterialPageRoute(builder: (context) => BusinessSignUpPage()),
                   // );
                 },
-                child: Text('Sign up as business'),
+                child: const Text('Sign up as business'),
               ),
             ),
           ],
@@ -186,36 +206,41 @@ class _RegisterPageState extends State<RegisterPage> {
                   controller: emailController,
                   hintText: 'Email',
                   obscureText: false,
+                  keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 10),
                 MyTextField(
                   controller: firstNameController,
                   hintText: 'First Name',
                   obscureText: false,
+                  keyboardType: TextInputType.text,
                 ),
                 const SizedBox(height: 10),
                 MyTextField(
-                  controller: lastNameController,
-                  hintText: 'Last Name',
-                  obscureText: false,
-                ),
+                    controller: lastNameController,
+                    hintText: 'Last Name',
+                    obscureText: false,
+                    keyboardType: TextInputType.text),
                 const SizedBox(height: 10),
                 MyTextField(
                   controller: ageController,
                   hintText: 'Age',
                   obscureText: false,
+                  keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 10),
                 MyTextField(
                   controller: passwordController,
                   hintText: 'Password',
                   obscureText: true,
+                  keyboardType: TextInputType.text,
                 ),
                 const SizedBox(height: 10),
                 MyTextField(
                   controller: confirmPasswordController,
                   hintText: 'Confirm Password',
                   obscureText: true,
+                  keyboardType: TextInputType.text,
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 25.0),
@@ -228,86 +253,90 @@ class _RegisterPageState extends State<RegisterPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Center(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        //will contain validation code and check if any fields are empty.
-                        if (_validateRegisterInput()) {
-                          await _createusersAccount();
-                          widget.onUsersAccountCreated();
-                        }
-                      },
-                      style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(Colors.black),
+                    child: Container(
+                      height: 40,
+                      width: 180,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          //will contain validation code and check if any fields are empty.
+                          if (_validateRegisterInput()) {
+                            await _createusersAccount();
+                            widget.onUsersAccountCreated();
+                          }
+                        },
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all<Color>(Colors.black),
+                        ),
+                        child: const Text('Create Users Account'),
                       ),
-                      child: const Text('Create Users Account'),
                     ),
                   ),
                 ),
                 const SizedBox(height: 30),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Divider(
-                          thickness: 0.5,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Text(
-                          'Or continue with',
-                          style: TextStyle(color: Colors.grey[700]),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          thickness: 0.5,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      child:
-                          const SquareTile(imagePath: 'lib/images/google.png'),
-                    ),
-                    const SizedBox(width: 25),
-                    GestureDetector(
-                      onTap: showBusinessAlert,
-                      child: Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB(
-                              255, 62, 169, 158), // Replace with desired color
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'Sign in as business',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors
-                                  .black, // Replace with desired text color
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                //   child: Row(
+                //     children: [
+                //       Expanded(
+                //         child: Divider(
+                //           thickness: 0.5,
+                //           color: Colors.grey[400],
+                //         ),
+                //       ),
+                //       Padding(
+                //         padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                //         child: Text(
+                //           'Or continue with',
+                //           style: TextStyle(color: Colors.grey[700]),
+                //         ),
+                //       ),
+                //       Expanded(
+                //         child: Divider(
+                //           thickness: 0.5,
+                //           color: Colors.grey[400],
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                // const SizedBox(height: 30),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   children: [
+                //     Container(
+                //       width: 80,
+                //       height: 80,
+                //       child:
+                //           const SquareTile(imagePath: 'lib/images/google.png'),
+                //     ),
+                //     const SizedBox(width: 25),
+                //     GestureDetector(
+                //       onTap: showBusinessAlert,
+                //       child: Container(
+                //         width: 80,
+                //         height: 80,
+                //         decoration: BoxDecoration(
+                //           color: Color.fromARGB(
+                //               255, 62, 169, 158), // Replace with desired color
+                //           borderRadius: BorderRadius.circular(10),
+                //         ),
+                //         child: const Center(
+                //           child: Text(
+                //             'Sign in as business',
+                //             textAlign: TextAlign.center,
+                //             style: TextStyle(
+                //               color: Colors
+                //                   .black, // Replace with desired text color
+                //               fontSize: 12,
+                //             ),
+                //           ),
+                //         ),
+                //       ),
+                //     ),
+                //   ],
+                // ),
+                // const SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

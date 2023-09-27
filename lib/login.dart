@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:salon/AuthPages/authentication.dart';
 import 'package:salon/Businessaccountpages/BusinessSignUpPage.dart';
 import 'package:salon/Businessaccountpages/Login_business.dart';
+import 'package:salon/Forgotpassword.dart';
 import 'package:salon/components/my_buttons.dart';
 import 'package:salon/components/my_textfield.dart';
 import 'package:salon/components/square_tile.dart';
@@ -174,16 +175,23 @@ class _LoginPageState extends State<LoginPage> {
               context, MaterialPageRoute(builder: (context) => AuthPage()));
         } else {
           //vayena vani error msg yeta show garni
-          print('Unknown user type');
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Unknown user type'),
+          ));
         }
       } else {
         //null case lai yeta show garne
-        print('User is null');
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('User is null'),
+        ));
       }
     } catch (e) {
       // Handle authentication errors (e.g., invalid credentials)
       // You can show an error message or take appropriate action here
       print('Error signing in: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Error signing in: $e'),
+      ));
     }
   }
 
@@ -212,25 +220,32 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 25),
                 MyTextField(
-                  controller: emailController,
-                  hintText: 'Email',
-                  obscureText: false,
-                ),
+                    controller: emailController,
+                    hintText: 'Email',
+                    obscureText: false,
+                    keyboardType: TextInputType.emailAddress),
                 const SizedBox(height: 10),
                 MyTextField(
-                  controller: passwordController,
-                  hintText: 'Password',
-                  obscureText: true,
-                ),
+                    controller: passwordController,
+                    hintText: 'Password',
+                    obscureText: true,
+                    keyboardType: TextInputType.text),
                 const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text(
-                        'Forgot Password?',
-                        style: TextStyle(color: Colors.grey[600]),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => ForgotPasswordPage(),
+                          ));
+                        },
+                        child: Text(
+                          'Forgot Password?',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
                       ),
                     ],
                   ),
