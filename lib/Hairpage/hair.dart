@@ -2,30 +2,68 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:salon/Hairpage/timeslotpage.dart';
 
+class Service {
+  final String name;
+  final String description;
+  final int price;
+  Service({
+    required this.name,
+    required this.description,
+    required this.price,
+  });
+}
+
 class HairPage extends StatefulWidget {
   @override
   State<HairPage> createState() => _HairPageState();
 }
 
 class _HairPageState extends State<HairPage> {
-  final List<String> hairServices = [
-    "Haircut",
-    "Hair Styling",
-    "Hair Coloring",
-    "Hair Extensions",
-  ];
+  List<Service> hairdynamic = [];
   late TimeSlot selectedTimeSlot;
-  // ServiceProvider selectedProviders =
-  //     ServiceProvider(name: '', description: '', profileImage: '');
-  // String selectedServices = '';
   List<String> selectedServices = [];
   List<ServiceProvider> selectedProviders = [];
   Map<String, ServiceProvider?> selectedProviderMap = {};
-  List<Service> hairServicesData = [];
+
+  // Initialize Firestore
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // Function to fetch data from Firestore
+  Future<void> fetchServiceData() async {
+    try {
+      final querySnapshot =
+          await _firestore.collection('service_added_data').get();
+      final services = querySnapshot.docs.map((doc) {
+        final serviceNames = doc['serviceName'] as String;
+        final description = doc['description'] as String;
+        final price = doc['price'];
+
+        int parsedPrice = 0;
+        if (price is int) {
+          parsedPrice = price;
+        } else if (price is String) {
+          final int? parsedInt = int.tryParse(price);
+          if (parsedInt != null) {
+            parsedPrice = parsedInt;
+          }
+        }
+
+        return Service(
+            name: serviceNames, description: description, price: parsedPrice);
+      }).toList();
+      setState(() {
+        hairdynamic = services;
+      });
+    } catch (e) {
+      print("Error fetching data: $e");
+      throw e; // throws exception error lai indicate garauna
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    // fetchData();
+    fetchServiceData();
     selectedTimeSlot = TimeSlot(
       time: 'Default Time',
       isBooked: false,
@@ -33,43 +71,7 @@ class _HairPageState extends State<HairPage> {
     );
   }
 
-  Future<List<Service>> fetchHairServices() async {
-    final CollectionReference serviceCollection =
-        FirebaseFirestore.instance.collection('service_added_data');
-
-    try {
-      QuerySnapshot snapshot = await serviceCollection.get();
-      List<Service> services = [];
-
-      for (QueryDocumentSnapshot doc in snapshot.docs) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        // Check if the fetched service matches one of the predefined categories
-        if (hairServices.contains(data['serviceName'])) {
-          services.add(Service(
-            serviceName: data['serviceName'],
-            description: data['description'],
-            price: data['price'],
-          ));
-        }
-      }
-
-      return services;
-    } catch (e) {
-      print('Error fetching service providers: $e');
-      return [];
-    }
-  }
-  // Future<void> fetchData() async {
-  //   try {
-  //     final services = await DataService.fetchHairServices();
-  //     setState(() {
-  //       HairServices = services;
-  //     });
-  //   } catch (e) {
-  //     print('Error fetching data: $e');
-  //   }
-  // }
-
+//product selection and deselection ko lagi
   void toggleSelection(
       ServiceProvider provider, String service, bool isSelected) {
     setState(() {
@@ -107,10 +109,10 @@ class _HairPageState extends State<HairPage> {
         title: Text('Hair Services'),
       ),
       body: ListView.builder(
-        itemCount: hairServices.length,
+        itemCount: hairdynamic.length,
         itemBuilder: (context, index) {
-          final service = hairServices[index];
-          final serviceProviders = getServiceProviders(service);
+          final service = hairdynamic[index];
+          final serviceProviders = getServiceProviders(service.name);
 
           if (serviceProviders.isEmpty) {
             selectedTimeSlot = TimeSlot(
@@ -130,7 +132,7 @@ class _HairPageState extends State<HairPage> {
                 children: [
                   ListTile(
                     title: Text(
-                      service,
+                      service.name,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -150,7 +152,7 @@ class _HairPageState extends State<HairPage> {
                             borderRadius: BorderRadius.circular(8),
                             // Apply different background colors or borders based on isSelected
                             side: isSelected
-                                ? BorderSide(
+                                ? const BorderSide(
                                     color: Colors.green, // Selected color
                                     width: 2.0,
                                   )
@@ -159,7 +161,8 @@ class _HairPageState extends State<HairPage> {
                           child: CheckboxListTile(
                             value: provider.isSelected,
                             onChanged: (bool? newValue) {
-                              toggleSelection(provider, service, newValue!);
+                              toggleSelection(
+                                  provider, service.name, newValue!);
                             },
                             title: Text(
                               provider.name,
@@ -328,22 +331,4 @@ class ServiceProvider {
   get serviceName => null;
 
   get services => null;
-}
-
-class Service {
-  final String serviceName;
-  final String description;
-  final int price;
-
-  Service({
-    required this.serviceName,
-    required this.description,
-    required this.price,
-  });
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: HairPage(),
-  ));
 }
