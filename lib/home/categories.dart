@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:salon/Hairpage/hair.dart';
+// import 'package:salon/Hairpage/hair.dart';
+import 'package:salon/Hairpage/PopulateHairPage.dart';
 
 class Categories extends StatelessWidget {
   const Categories({super.key});
@@ -30,7 +31,7 @@ class Categories extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => HairPage(),
+                            builder: (context) => HairPagepopulation(),
                           ),
                         );
                       }

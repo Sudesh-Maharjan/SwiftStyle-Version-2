@@ -13,8 +13,10 @@ class _AnotherPageState extends State<AnotherPage> {
 
   TextEditingController serviceNameController = TextEditingController();
   TextEditingController priceController = TextEditingController();
+  TextEditingController serviceProviderNameController = TextEditingController();
   String? selectedDuration = "30 minutes";
   TextEditingController descriptionController = TextEditingController();
+  bool dataSubmitted = false;
 
   void addService() {
     if (_formKey.currentState!.validate()) {
@@ -24,14 +26,20 @@ class _AnotherPageState extends State<AnotherPage> {
           'duration': selectedDuration,
           'price': priceController.text,
           'description': descriptionController.text,
+          'serviceProviderName': serviceProviderNameController.text,
         });
 
         serviceNameController.clear();
         priceController.clear();
         descriptionController.clear();
+        serviceProviderNameController.clear();
         selectedDuration = "30 minutes";
+        dataSubmitted = true;
       });
-      storeServicesInFirestore();
+      if (dataSubmitted) {
+        storeServicesInFirestore();
+        dataSubmitted = false; // Reset the flag for next submission
+      }
     }
   }
 
@@ -50,6 +58,7 @@ class _AnotherPageState extends State<AnotherPage> {
         'duration': service['duration'],
         'price': service['price'],
         'description': service['description'],
+        'serviceProviderName': service['serviceProviderName'],
       });
     }
   }
@@ -71,6 +80,8 @@ class _AnotherPageState extends State<AnotherPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildTextField('Service Name', serviceNameController),
+              _buildTextField(
+                  'Service Providers Name', serviceProviderNameController),
               _buildDropdownField('Duration', selectedDuration),
               _buildNumericTextField('Price (e.g. \$50)', priceController),
               _buildTextField('Description', descriptionController),
@@ -95,7 +106,7 @@ class _AnotherPageState extends State<AnotherPage> {
                         title:
                             Text('Service: ${services[index]['serviceName']}'),
                         subtitle: Text(
-                          'Duration: ${services[index]['duration'] ?? 'N/A'}\nPrice: ${services[index]['price'] ?? 'N/A'}\nDescription: ${services[index]['description'] ?? 'N/A'}',
+                          'Provider: ${services[index]['serviceProviderName'] ?? 'N/A'}\nDuration: ${services[index]['duration'] ?? 'N/A'}\nPrice: ${services[index]['price'] ?? 'N/A'}\nDescription: ${services[index]['description'] ?? 'N/A'}',
                         ),
                       ),
                     );
