@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:khalti_flutter/khalti_flutter.dart';
 
 class KhaltiPaymentPage extends StatefulWidget {
-  const KhaltiPaymentPage({Key? key}) : super(key: key);
+  final double totalPrice;
+  const KhaltiPaymentPage({required this.totalPrice, Key? key})
+      : super(key: key);
 
   @override
   State<KhaltiPaymentPage> createState() => _KhaltiPaymentPageState();
@@ -10,6 +12,11 @@ class KhaltiPaymentPage extends StatefulWidget {
 
 class _KhaltiPaymentPageState extends State<KhaltiPaymentPage> {
   TextEditingController amountController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    amountController.text = widget.totalPrice.toString();
+  }
 
   getAmt() {
     return int.parse(amountController.text) * 100;

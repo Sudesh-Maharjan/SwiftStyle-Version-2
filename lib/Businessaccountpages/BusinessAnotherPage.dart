@@ -2,6 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:salon/Businessaccountpages/BusinessPage2.dart';
 
+final List<String> serviceOptions = [
+  'Hair Cutting',
+  'Hair Coloring',
+  'Hair Styling'
+];
+
 class AnotherPage extends StatefulWidget {
   @override
   _AnotherPageState createState() => _AnotherPageState();
@@ -9,12 +15,13 @@ class AnotherPage extends StatefulWidget {
 
 class _AnotherPageState extends State<AnotherPage> {
   List<Map<String, String?>> services = [];
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  TextEditingController serviceNameController = TextEditingController();
   TextEditingController priceController = TextEditingController();
   TextEditingController serviceProviderNameController = TextEditingController();
   String? selectedDuration = "30 minutes";
+  String? selectedService;
   TextEditingController descriptionController = TextEditingController();
   bool dataSubmitted = false;
 
@@ -22,14 +29,14 @@ class _AnotherPageState extends State<AnotherPage> {
     if (_formKey.currentState!.validate()) {
       setState(() {
         services.add({
-          'serviceName': serviceNameController.text,
+          'serviceName': selectedService,
           'duration': selectedDuration,
           'price': priceController.text,
           'description': descriptionController.text,
           'serviceProviderName': serviceProviderNameController.text,
         });
 
-        serviceNameController.clear();
+        selectedService = null;
         priceController.clear();
         descriptionController.clear();
         serviceProviderNameController.clear();
@@ -38,7 +45,7 @@ class _AnotherPageState extends State<AnotherPage> {
       });
       if (dataSubmitted) {
         storeServicesInFirestore();
-        dataSubmitted = false; // Reset the flag for next submission
+        dataSubmitted = false;
       }
     }
   }
@@ -79,10 +86,11 @@ class _AnotherPageState extends State<AnotherPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildTextField('Service Name', serviceNameController),
+              _buildDropdownField(
+                  'Service Name', selectedService, serviceOptions),
               _buildTextField(
                   'Service Providers Name', serviceProviderNameController),
-              _buildDropdownField('Duration', selectedDuration),
+              _buildDropdownField('Duration', selectedDuration, ['30 minutes']),
               _buildNumericTextField('Price (e.g. \$50)', priceController),
               _buildTextField('Description', descriptionController),
               const SizedBox(height: 20.0),
@@ -117,12 +125,12 @@ class _AnotherPageState extends State<AnotherPage> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: navigateToNextPage,
-        tooltip: 'Go to Next Page',
-        child: const Icon(Icons.arrow_forward),
-        backgroundColor: const Color.fromARGB(255, 102, 193, 207),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: navigateToNextPage,
+      //   tooltip: 'Go to Next Page',
+      //   child: Icon(Icons.arrow_forward),
+      //   backgroundColor: const Color.fromARGB(255, 102, 193, 207),
+      // ),
     );
   }
 
@@ -194,7 +202,8 @@ class _AnotherPageState extends State<AnotherPage> {
     );
   }
 
-  Widget _buildDropdownField(String label, String? value) {
+  Widget _buildDropdownField(
+      String label, String? value, List<String> options) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -213,14 +222,13 @@ class _AnotherPageState extends State<AnotherPage> {
             value: value,
             onChanged: (newValue) {
               setState(() {
-                selectedDuration = newValue;
+                selectedService = newValue;
               });
             },
-            items: <String>['30 minutes']
-                .map<DropdownMenuItem<String>>((String value) {
+            items: options.map<DropdownMenuItem<String>>((String option) {
               return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
+                value: option,
+                child: Text(option),
               );
             }).toList(),
             decoration: const InputDecoration(

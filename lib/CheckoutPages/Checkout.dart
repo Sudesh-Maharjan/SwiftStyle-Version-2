@@ -69,7 +69,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => KhaltiPaymentPage(),
+                      builder: (context) => KhaltiPaymentPage(
+                        totalPrice: widget.totalPrice,
+                      ),
                     ),
                   );
                 },

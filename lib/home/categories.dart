@@ -12,8 +12,8 @@ class Categories extends StatelessWidget {
       {"icon": "lib/icons/hair.svg", "text": "Hair"},
       {"icon": "lib/icons/nails.svg", "text": "Nails"},
       {"icon": "lib/icons/makeup.svg", "text": "Make-Up"},
-      {"icon": "lib/icons/offers.svg", "text": "Offers "},
-      {"icon": "lib/icons/more.svg", "text": "More"},
+      // {"icon": "lib/icons/offers.svg", "text": "Offers "},
+      // {"icon": "lib/icons/more.svg", "text": "More"},
     ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
