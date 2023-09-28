@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:salon/Hairpage/PopulateHairPage.dart';
+import 'package:salon/Hairpage/PopulateHairPage.dart'; // You may need to import this
+import 'package:salon/Khalit/Khalti_payment_gateway.dart';
 
 class CheckoutPage extends StatefulWidget {
   final List<Service> selectedServices; // Selected services
@@ -9,125 +9,110 @@ class CheckoutPage extends StatefulWidget {
     required this.selectedServices,
     required this.totalPrice,
   });
+
   @override
   _CheckoutPageState createState() => _CheckoutPageState();
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  late Future<List<Map<String, dynamic>>> bookings;
-
-  @override
-  void initState() {
-    super.initState();
-    bookings = fetchBookings();
-  }
-
-  Future<List<Map<String, dynamic>>> fetchBookings() async {
-    final QuerySnapshot<Map<String, dynamic>> querySnapshot =
-        await FirebaseFirestore.instance
-            .collection('user_servicebookedinfo')
-            .get();
-
-    final List<Map<String, dynamic>> bookings = [];
-
-    for (QueryDocumentSnapshot<Map<String, dynamic>> doc
-        in querySnapshot.docs) {
-      final Map<String, dynamic> data = doc.data();
-      bookings.add(data);
-    }
-
-    return bookings;
-  }
+  bool payOfflineSelected = false;
+  bool payWithKhaltiSelected = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Checkout'),
+        backgroundColor: Colors.black, // Set appbar color to black
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Bookings:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Expanded(
-              child: FutureBuilder<List<Map<String, dynamic>>>(
-                future: bookings,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text('No bookings found.');
-                  } else {
-                    final List<Map<String, dynamic>> bookingData =
-                        snapshot.data!;
-                    return ListView.builder(
-                      itemCount: bookingData.length,
-                      itemBuilder: (context, index) {
-                        final Map<String, dynamic> booking = bookingData[index];
-                        return BookingCard(booking: booking);
-                      },
-                    );
-                  }
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Selected Services:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              // Display the selected services and total price
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: widget.selectedServices.map((service) {
+                  return Text(
+                    '- ${service.name}',
+                    style: const TextStyle(fontSize: 18),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Total Price: \$${widget.totalPrice.toStringAsFixed(2)}',
+                style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold), // Bold the total price
+              ),
+              const SizedBox(height: 32),
+              const Text(
+                'Payment Options:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              // Payment with Khalti button
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    payOfflineSelected = false;
+                    payWithKhaltiSelected = true;
+                  });
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => KhaltiPaymentPage(),
+                    ),
+                  );
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      payWithKhaltiSelected ? Colors.grey : Colors.purple,
+                ),
+                child: const Text(
+                  'Payment with Khalti',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class BookingCard extends StatelessWidget {
-  final Map<String, dynamic> booking;
-
-  BookingCard({required this.booking});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 8.0),
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Time Slot: ${booking['timeSlot']}',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 16),
+              // Pay Offline (Tick mark)
+              Row(
+                children: [
+                  Checkbox(
+                    value: payOfflineSelected,
+                    onChanged: (value) {
+                      setState(() {
+                        payOfflineSelected = value!;
+                        payWithKhaltiSelected = !value;
+                      });
+                    },
+                  ),
+                  const Text('Pay Offline', style: TextStyle(fontSize: 18)),
+                ],
               ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Selected Services:',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: (booking['selectedServices'] as List<dynamic>)
-                  .map<Widget>((service) {
-                return Text(
-                  '- $service',
-                  style: TextStyle(fontSize: 14),
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Total Price: \$${booking['totalPrice'].toStringAsFixed(2)}',
-              style: TextStyle(fontSize: 14),
-            ),
-          ],
+              const SizedBox(height: 32),
+              // Booking Confirmation button (enabled if one option is selected)
+              ElevatedButton(
+                onPressed: (payOfflineSelected || payWithKhaltiSelected)
+                    ? () {
+                        // Handle booking confirmation here
+                      }
+                    : null, // Disable the button  yedi option select garena vani
+                child: const Text(
+                  'Confirm Booking',
+                  style: TextStyle(fontSize: 20),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

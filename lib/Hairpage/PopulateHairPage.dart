@@ -24,6 +24,7 @@ class HairPagepopulation extends StatefulWidget {
 
 class _HairPagepopulationState extends State<HairPagepopulation> {
   List<Service> hairdynamic = [];
+  bool isButtonEnabled = false;
 
   // Initialize Firestore
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -73,6 +74,7 @@ class _HairPagepopulationState extends State<HairPagepopulation> {
   void toggleServiceSelection(int index) {
     setState(() {
       hairdynamic[index].isSelected = !hairdynamic[index].isSelected;
+      isButtonEnabled = hairdynamic.any((service) => service.isSelected);
     });
   }
 
@@ -102,17 +104,19 @@ class _HairPagepopulationState extends State<HairPagepopulation> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.black,
-        onPressed: () {
-          List<Service> selectedServices = getSelectedServices();
-          // Navigate to the next page ani pass selected services ko data
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  TimeSlotPage(selectedServices: selectedServices),
-            ),
-          );
-        },
+        onPressed: isButtonEnabled
+            ? () {
+                List<Service> selectedServices = getSelectedServices();
+                // Navigate to the next page ani pass selected services ko data
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        TimeSlotPage(selectedServices: selectedServices),
+                  ),
+                );
+              }
+            : null,
         child: Icon(Icons.arrow_forward),
       ),
     );
