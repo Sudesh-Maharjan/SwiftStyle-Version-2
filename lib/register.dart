@@ -85,6 +85,16 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   bool _validateRegisterInput() {
+    final firstNameuser = firstNameController.text;
+    final lastNameuser = lastNameController.text;
+    final passworduser = passwordController.text;
+    // final confirmPassworduser = confirmPasswordController.text;
+
+    // Regex patterns for validation
+    final namePattern_user = RegExp(r'^(?!.*(.)\1{2})[a-zA-Z]+$');
+    final passwordPattern_user =
+        RegExp(r'^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$');
+
     //empty eroor handel gareko
     if (emailController.text.isEmpty ||
         passwordController.text.isEmpty ||
@@ -97,9 +107,34 @@ class _RegisterPageState extends State<RegisterPage> {
       ));
       return false;
     }
+
+    if (!namePattern_user.hasMatch(firstNameuser)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text(
+            'First Name should contain only letters and not have continuously repeating letters more than 2 times.'),
+      ));
+      return false;
+    }
+
+    if (!namePattern_user.hasMatch(lastNameuser)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text(
+            'Last Name should contain only letters and not have continuously repeating letters more than 2 times.'),
+      ));
+      return false;
+    }
+
+    if (!passwordPattern_user.hasMatch(passworduser)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+            'Password should contain at least one special character, one number, and be at least 6 characters long.'),
+      ));
+      return false;
+    }
+
     //first name ra last name lai character check gareko
-    if (firstNameController.text.length <= 3 ||
-        lastNameController.text.length <= 3) {
+    if (firstNameController.text.length <= 4 ||
+        lastNameController.text.length <= 4) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text(
             "First name and last name should have more than 3 characters. "),
@@ -116,14 +151,14 @@ class _RegisterPageState extends State<RegisterPage> {
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
 
-    if (password.length < 8) {
+    if (password.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Password must be at least 8 characters long."),
       ));
 
       return false;
     }
-    if (confirmPassword.length < 8) {
+    if (confirmPassword.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Password must be at least 8 characters long."),
       ));
@@ -239,7 +274,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     hintText: 'Last Name',
                     obscureText: false,
                     keyboardType: TextInputType.text),
-
                 const SizedBox(height: 10),
                 MyTextField(
                   controller: ageController,
@@ -293,69 +327,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                // Padding(
-                //   padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                //   child: Row(
-                //     children: [
-                //       Expanded(
-                //         child: Divider(
-                //           thickness: 0.5,
-                //           color: Colors.grey[400],
-                //         ),
-                //       ),
-                //       Padding(
-                //         padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                //         child: Text(
-                //           'Or continue with',
-                //           style: TextStyle(color: Colors.grey[700]),
-                //         ),
-                //       ),
-                //       Expanded(
-                //         child: Divider(
-                //           thickness: 0.5,
-                //           color: Colors.grey[400],
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                // const SizedBox(height: 30),
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.center,
-                //   children: [
-                //     Container(
-                //       width: 80,
-                //       height: 80,
-                //       child:
-                //           const SquareTile(imagePath: 'lib/images/google.png'),
-                //     ),
-                //     const SizedBox(width: 25),
-                //     GestureDetector(
-                //       onTap: showBusinessAlert,
-                //       child: Container(
-                //         width: 80,
-                //         height: 80,
-                //         decoration: BoxDecoration(
-                //           color: Color.fromARGB(
-                //               255, 62, 169, 158), // Replace with desired color
-                //           borderRadius: BorderRadius.circular(10),
-                //         ),
-                //         child: const Center(
-                //           child: Text(
-                //             'Sign in as business',
-                //             textAlign: TextAlign.center,
-                //             style: TextStyle(
-                //               color: Colors
-                //                   .black, // Replace with desired text color
-                //               fontSize: 12,
-                //             ),
-                //           ),
-                //         ),
-                //       ),
-                //     ),
-                //   ],
-                // ),
-                // const SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

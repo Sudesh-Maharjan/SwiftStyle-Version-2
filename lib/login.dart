@@ -7,7 +7,6 @@ import 'package:salon/Businessaccountpages/Login_business.dart';
 import 'package:salon/Forgotpassword.dart';
 import 'package:salon/components/my_buttons.dart';
 import 'package:salon/components/my_textfield.dart';
-import 'package:salon/components/square_tile.dart';
 
 class LoginPage extends StatefulWidget {
   final Function()? onTap;
@@ -212,7 +211,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 50),
                 Text(
-                  'Welcome back you\'ve been missed!',
+                  'Welcome!',
                   style: TextStyle(
                     color: Colors.grey[700],
                     fontSize: 16,
@@ -286,12 +285,12 @@ class _LoginPageState extends State<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      child:
-                          const SquareTile(imagePath: 'lib/images/google.png'),
-                    ),
+                    // Container(
+                    //   width: 80,
+                    //   height: 80,
+                    //   child:
+                    //       const SquareTile(imagePath: 'lib/images/google.png'),
+                    // ),
                     const SizedBox(width: 25),
                     GestureDetector(
                       onTap: showBusinessAlert,

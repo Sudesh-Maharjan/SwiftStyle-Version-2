@@ -20,6 +20,7 @@ class _ProfilePageState extends State<ProfilePage> {
   // late String? firstName;
   // late String? lastName;
   bool isDataSaved = false;
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   @override
   void initState() {
     super.initState();
@@ -102,7 +103,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future<void> _showConfirmationDialog(BuildContext context) async {
+  Future<void> _showConfirmationDialog() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -140,15 +141,14 @@ class _ProfilePageState extends State<ProfilePage> {
                     //Signout farako
                     await FirebaseAuth.instance.signOut();
 
-                    Navigator.of(context)
-                        .pop(ProfilePage()); // Close the dialog
-                    Navigator.of(context)
-                        .pop(ProfilePage()); // Close the dialog
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (context) => LoginPage(
-                        onTap: () {},
+                    // Navigate to the login page using the global navigator
+                    _navigatorKey.currentState?.pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => LoginPage(
+                          onTap: () {},
+                        ),
                       ),
-                    ));
+                    );
                   } catch (e) {
                     // Handle errors here
                     print('Error deleting account: $e');
@@ -175,114 +175,124 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: const Text('Profile'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const CircleAvatar(
-                radius: 60,
-                backgroundImage:
-                    NetworkImage('https://example.com/profile_image.jpg'),
+    return Navigator(
+      key: _navigatorKey,
+      onGenerateRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (context) {
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: Colors.black,
+                title: const Text('Profile'),
               ),
-              const SizedBox(height: 16.0),
-              Text(
-                user.email!,
-                style: const TextStyle(
-                  fontSize: 16.0,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              const Divider(),
-              const SizedBox(height: 16.0),
-              const Text(
-                'Personal Information',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              TextFormField(
-                controller: phoneNumberController,
-                decoration: const InputDecoration(
-                  labelText: 'Phone Number',
-                  prefixIcon: Icon(Icons.phone),
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              TextFormField(
-                controller: dobController,
-                decoration: const InputDecoration(
-                  labelText: 'Date of Birth',
-                  prefixIcon: Icon(Icons.calendar_today),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              const Divider(),
-              const SizedBox(height: 16.0),
-              const Text(
-                'Address',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              TextFormField(
-                controller: addressController,
-                decoration: const InputDecoration(
-                  labelText: 'Address',
-                  prefixIcon: Icon(Icons.location_on),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: () {
-                  saveUserData();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Colors.black, // Set the background color here
-                ),
-                child: const Text(
-                  'Save',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              if (isDataSaved) // Display confirmation message when data is saved
-                const Text(
-                  'Information has been saved.',
-                  style: TextStyle(
-                    color: Colors.green,
+              body: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const CircleAvatar(
+                        radius: 60,
+                        backgroundImage: NetworkImage(
+                            'https://example.com/profile_image.jpg'),
+                      ),
+                      const SizedBox(height: 16.0),
+                      Text(
+                        user.email!,
+                        style: const TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      const Divider(),
+                      const SizedBox(height: 16.0),
+                      const Text(
+                        'Personal Information',
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      TextFormField(
+                        controller: phoneNumberController,
+                        decoration: const InputDecoration(
+                          labelText: 'Phone Number',
+                          prefixIcon: Icon(Icons.phone),
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      TextFormField(
+                        controller: dobController,
+                        decoration: const InputDecoration(
+                          labelText: 'Date of Birth',
+                          prefixIcon: Icon(Icons.calendar_today),
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      const Divider(),
+                      const SizedBox(height: 16.0),
+                      const Text(
+                        'Address',
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      TextFormField(
+                        controller: addressController,
+                        decoration: const InputDecoration(
+                          labelText: 'Address',
+                          prefixIcon: Icon(Icons.location_on),
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      ElevatedButton(
+                        onPressed: () {
+                          saveUserData();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Colors.black, // Set the background color here
+                        ),
+                        child: const Text(
+                          'Save',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      if (isDataSaved) // Display confirmation message when data is saved
+                        const Text(
+                          'Information has been saved.',
+                          style: TextStyle(
+                            color: Colors.green,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              _showConfirmationDialog(context);
-            },
-            child: Text(
-              'Delete Account',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ),
-      ),
+              ),
+              bottomNavigationBar: BottomAppBar(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ElevatedButton(
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    onPressed: () {
+                      _showConfirmationDialog();
+                    },
+                    child: Text(
+                      'Delete Account',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

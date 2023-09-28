@@ -92,9 +92,10 @@ class _BusinessSignupPageState extends State<BusinessSignupPage> {
     final phoneNumber = _bphonenumberController.text;
     final password = _bpasswordController.text;
     final confirmPassword = _bconfirmpasswordController.text;
+    final businesslocation = _blocationController.text;
 
     // Regex patterns for validation
-    final namePattern = RegExp(r'^[a-zA-Z]+$');
+    final namePattern = RegExp(r'^(?!.*(.)\1{2})[a-zA-Z]+$');
     final phonePattern = RegExp(r'^98\d{8}$');
     final passwordPattern =
         RegExp(r'^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$');
@@ -111,13 +112,37 @@ class _BusinessSignupPageState extends State<BusinessSignupPage> {
       ));
       return false;
     }
-    if (!namePattern.hasMatch(firstName) || !namePattern.hasMatch(lastName)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('First Name and Last Name should contain only letters.'),
+    if (!namePattern.hasMatch(firstName)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text(
+            'First Name should contain only letters and not have continuously repeating letters more than 2 times.'),
+      ));
+      return false;
+    }
+    if (firstName.length <= 4 ||
+        lastName.length <= 4 ||
+        businesslocation.length <= 4) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text(
+            'First name, Last name and Business location should be at least 5 characters'),
       ));
       return false;
     }
 
+    if (!namePattern.hasMatch(lastName)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text(
+            'Last Name should contain only letters and not have continuously repeating letters more than 2 times.'),
+      ));
+      return false;
+    }
+    if (!namePattern.hasMatch(businesslocation)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text(
+            'Business location should contain only letters and not have continuously repeating letters more than 2 times.'),
+      ));
+      return false;
+    }
     if (!phonePattern.hasMatch(phoneNumber)) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content:

@@ -141,6 +141,9 @@ class NextPage extends StatelessWidget {
     final String localityName = localityNameController.text;
     final String contactNumber = contactNumberController.text;
 
+    final contactpattern = RegExp(r'^98\d{8}$');
+    final namePattern_business_next = RegExp(r'^(?!.*(.)\1{2})[a-zA-Z]+$');
+
     // Check if any field is empty
     if (businessName.isEmpty ||
         cityName.isEmpty ||
@@ -154,6 +157,50 @@ class NextPage extends StatelessWidget {
     // Check if city field contains numbers
     if (containsNumbers(cityName)) {
       _showValidationError('City should not contain numbers.');
+      return false;
+    }
+
+    // Check if businessName contains only letters
+    if (!namePattern_business_next.hasMatch(businessName)) {
+      _showValidationError(
+          'Business Name letters should not be repeated contineously');
+      return false;
+    }
+    if (businessName.length <= 6) {
+      _showValidationError('Business Name should be more than 6 letters');
+      return false;
+    }
+    if (addressName.length <= 4) {
+      _showValidationError('Address should have at least 5 letters.');
+      return false;
+    }
+    if (localityName.length <= 4) {
+      _showValidationError('Locality name should have at least 5 letters.');
+      return false;
+    }
+
+    // Check if city and locality have more than 4 letters
+    if (cityName.length < 4 || localityName.length < 4) {
+      _showValidationError('City and Locality should have at least 4 letters.');
+      return false;
+    }
+
+    // Check if city and locality have no repeated letters more than 2 times
+    if (!namePattern_business_next.hasMatch(localityName)) {
+      _showValidationError(
+          'Locality name letter should not repeat more them 2 time.');
+      return false;
+    }
+    if (!namePattern_business_next.hasMatch(cityName)) {
+      _showValidationError(
+          'City name letter should not repeat more than 2 times');
+      return false;
+    }
+
+    // Check if contact number follows the pattern
+    if (!contactpattern.hasMatch(contactNumber)) {
+      _showValidationError(
+          'Phone Number should start with 98 and contain 10 digits.');
       return false;
     }
 

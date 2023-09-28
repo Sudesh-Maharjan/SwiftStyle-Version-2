@@ -15,7 +15,7 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  bool payOfflineSelected = false;
+  // bool payOfflineSelected = false;
   bool payWithKhaltiSelected = false;
 
   @override
@@ -63,7 +63,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
               ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    payOfflineSelected = false;
+                    // payOfflineSelected = false;
                     payWithKhaltiSelected = true;
                   });
                   Navigator.push(
@@ -76,41 +76,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      payWithKhaltiSelected ? Colors.grey : Colors.purple,
+                  backgroundColor: Color.fromARGB(255, 154, 45, 173),
                 ),
                 child: const Text(
                   'Payment with Khalti',
                   style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Pay Offline (Tick mark)
-              Row(
-                children: [
-                  Checkbox(
-                    value: payOfflineSelected,
-                    onChanged: (value) {
-                      setState(() {
-                        payOfflineSelected = value!;
-                        payWithKhaltiSelected = !value;
-                      });
-                    },
-                  ),
-                  const Text('Pay Offline', style: TextStyle(fontSize: 18)),
-                ],
-              ),
-              const SizedBox(height: 32),
-              // Booking Confirmation button (enabled if one option is selected)
-              ElevatedButton(
-                onPressed: (payOfflineSelected || payWithKhaltiSelected)
-                    ? () {
-                        // Handle booking confirmation here
-                      }
-                    : null, // Disable the button  yedi option select garena vani
-                child: const Text(
-                  'Confirm Booking',
-                  style: TextStyle(fontSize: 20),
                 ),
               ),
             ],
