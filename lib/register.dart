@@ -106,10 +106,28 @@ class _RegisterPageState extends State<RegisterPage> {
       ));
       return false;
     }
+
     if (ageController.text.length > 2) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Age should have 2 or fewer digits."),
       ));
+      return false;
+    }
+    final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
+
+    if (password.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Password must be at least 8 characters long."),
+      ));
+
+      return false;
+    }
+    if (confirmPassword.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Password must be at least 8 characters long."),
+      ));
+
       return false;
     }
     return true;
@@ -221,6 +239,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     hintText: 'Last Name',
                     obscureText: false,
                     keyboardType: TextInputType.text),
+
                 const SizedBox(height: 10),
                 MyTextField(
                   controller: ageController,
