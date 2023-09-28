@@ -25,7 +25,7 @@ class _AnotherPageState extends State<AnotherPage> {
   TextEditingController descriptionController = TextEditingController();
   bool dataSubmitted = false;
 
-  void addService() {
+  void addService(BuildContext context) {
     if (_formKey.currentState!.validate()) {
       setState(() {
         services.add({
@@ -44,23 +44,16 @@ class _AnotherPageState extends State<AnotherPage> {
         dataSubmitted = true;
       });
       if (dataSubmitted) {
-        storeServicesInFirestore();
-        dataSubmitted = false;
+        storeServicesInFirestore(context);
       }
     }
   }
 
-  void navigateToNextPage() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => Page2()),
-    );
-  }
-
-  void storeServicesInFirestore() {
+  Future<void> storeServicesInFirestore(BuildContext context) async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
     for (final service in services) {
-      firestore.collection('service_added_data').add({
+      await firestore.collection('service_added_data').add({
         'serviceName': service['serviceName'],
         'duration': service['duration'],
         'price': service['price'],
@@ -68,6 +61,30 @@ class _AnotherPageState extends State<AnotherPage> {
         'serviceProviderName': service['serviceProviderName'],
       });
     }
+    // Show the success alert service add garexe
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Success'),
+          content: Text('Your service has been added.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the alert
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void navigateToNextPage() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => Page2()),
+    );
   }
 
   @override
@@ -98,7 +115,7 @@ class _AnotherPageState extends State<AnotherPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color.fromARGB(255, 102, 193, 207),
                 ),
-                onPressed: addService,
+                onPressed: () => addService(context),
                 child: const Text(
                   'Add Service',
                   style: TextStyle(fontSize: 18),

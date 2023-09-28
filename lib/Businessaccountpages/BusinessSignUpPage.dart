@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:salon/AuthPages/authentication.dart';
+// import 'package:regexed/regexed.dart';
 // import 'package:salon/login.dart';
 
 typedef void OnBusinessAccountCreated();
@@ -59,7 +60,7 @@ class _BusinessSignupPageState extends State<BusinessSignupPage> {
         ));
       } else {
         // Display an error message using SnackBar
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Passwords don't match"),
         ));
       }
@@ -86,6 +87,18 @@ class _BusinessSignupPageState extends State<BusinessSignupPage> {
     borderRadius: BorderRadius.circular(10.0),
   ));
   bool _validateInput() {
+    final firstName = _bfirstnameController.text;
+    final lastName = _blastnameController.text;
+    final phoneNumber = _bphonenumberController.text;
+    final password = _bpasswordController.text;
+    final confirmPassword = _bconfirmpasswordController.text;
+
+    // Regex patterns for validation
+    final namePattern = RegExp(r'^[a-zA-Z]+$');
+    final phonePattern = RegExp(r'^98\d{8}$');
+    final passwordPattern =
+        RegExp(r'^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$');
+
     if (_bemailController.text.isEmpty ||
         _bpasswordController.text.isEmpty ||
         _bconfirmpasswordController.text.isEmpty ||
@@ -93,11 +106,41 @@ class _BusinessSignupPageState extends State<BusinessSignupPage> {
         _blastnameController.text.isEmpty ||
         _bphonenumberController.text.isEmpty ||
         _blocationController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: const Text('Please fill in all required fields.'),
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Please fill in all required fields.'),
       ));
       return false;
     }
+    if (!namePattern.hasMatch(firstName) || !namePattern.hasMatch(lastName)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('First Name and Last Name should contain only letters.'),
+      ));
+      return false;
+    }
+
+    if (!phonePattern.hasMatch(phoneNumber)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content:
+            Text('Phone Number should start with 98 and contain 10 digits.'),
+      ));
+      return false;
+    }
+
+    if (!passwordPattern.hasMatch(password)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+            'Password should contain at least one special character, one number, and be at least 6 characters long.'),
+      ));
+      return false;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Passwords don\'t match.'),
+      ));
+      return false;
+    }
+
     return true;
   }
 
@@ -131,22 +174,22 @@ class _BusinessSignupPageState extends State<BusinessSignupPage> {
             TextFormField(
                 controller: _bfirstnameController,
                 decoration: _inputDecoration.copyWith(hintText: 'First Name ')),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _blastnameController,
               decoration: _inputDecoration.copyWith(hintText: 'Last Name'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _bemailController,
               decoration: _inputDecoration.copyWith(hintText: 'Email'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _bphonenumberController,
               decoration: _inputDecoration.copyWith(hintText: 'Phone Number'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _blocationController,
               decoration:
