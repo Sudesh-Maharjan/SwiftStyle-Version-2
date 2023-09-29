@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:salon/Businessaccountpages/BusinessPage2.dart';
 
 final List<String> serviceOptions = [
   'Hair Cutting',
@@ -24,6 +23,28 @@ class _AnotherPageState extends State<AnotherPage> {
   String? selectedService;
   TextEditingController descriptionController = TextEditingController();
   bool dataSubmitted = false;
+
+  String? validateServiceName(String? value) {
+    // Custom validator for service name
+    if (value == null || value.isEmpty) {
+      return 'Service name is required';
+    }
+    if (value.contains(RegExp(r'(.)\1{2,}'))) {
+      return 'Service name should not have continuously repeating characters';
+    }
+    return null;
+  }
+
+  String? validateServicePrice(String? value) {
+    // Custom validator for service price
+    if (value == null || value.isEmpty) {
+      return 'Service price is required';
+    }
+    if (double.tryParse(value) == null || double.parse(value) > 200) {
+      return 'Service price should be a valid number and not exceed 200';
+    }
+    return null;
+  }
 
   void addService(BuildContext context) {
     if (_formKey.currentState!.validate()) {
@@ -82,9 +103,7 @@ class _AnotherPageState extends State<AnotherPage> {
   }
 
   void navigateToNextPage() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => Page2()),
-    );
+    // Implement the navigation to the next page here
   }
 
   @override
@@ -203,12 +222,7 @@ class _AnotherPageState extends State<AnotherPage> {
           child: TextFormField(
             controller: controller,
             keyboardType: TextInputType.number, // Numeric keyboard
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'This field is required';
-              }
-              return null;
-            },
+            validator: validateServicePrice, // Add the custom validator
             decoration: const InputDecoration(
               border: InputBorder.none,
             ),
@@ -248,6 +262,7 @@ class _AnotherPageState extends State<AnotherPage> {
                 child: Text(option),
               );
             }).toList(),
+            validator: validateServiceName, // Add the custom validator
             decoration: const InputDecoration(
               border: InputBorder.none,
             ),

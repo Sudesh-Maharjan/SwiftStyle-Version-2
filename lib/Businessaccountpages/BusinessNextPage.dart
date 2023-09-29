@@ -142,7 +142,7 @@ class NextPage extends StatelessWidget {
     final String contactNumber = contactNumberController.text;
 
     final contactpattern = RegExp(r'^98\d{8}$');
-    final namePattern_business_next = RegExp(r'^(?!.*(.)\1{2})[a-zA-Z]+$');
+    // final namePattern_business_next = RegExp(r'cd saon^(?!.*(.)\1{2})[a-zA-Z]+$');
 
     // Check if any field is empty
     if (businessName.isEmpty ||
@@ -154,48 +154,13 @@ class NextPage extends StatelessWidget {
       return false;
     }
 
-    // Check if city field contains numbers
-    if (containsNumbers(cityName)) {
-      _showValidationError('City should not contain numbers.');
-      return false;
-    }
+    // Check for continuously repeating letters
+    // if (!namePattern_business_next.hasMatch(businessName) ||
 
-    // Check if businessName contains only letters
-    if (!namePattern_business_next.hasMatch(businessName)) {
-      _showValidationError(
-          'Business Name letters should not be repeated contineously');
-      return false;
-    }
-    if (businessName.length <= 6) {
-      _showValidationError('Business Name should be more than 6 letters');
-      return false;
-    }
-    if (addressName.length <= 4) {
-      _showValidationError('Address should have at least 5 letters.');
-      return false;
-    }
-    if (localityName.length <= 4) {
-      _showValidationError('Locality name should have at least 5 letters.');
-      return false;
-    }
-
-    // Check if city and locality have more than 4 letters
-    if (cityName.length < 4 || localityName.length < 4) {
-      _showValidationError('City and Locality should have at least 4 letters.');
-      return false;
-    }
-
-    // Check if city and locality have no repeated letters more than 2 times
-    if (!namePattern_business_next.hasMatch(localityName)) {
-      _showValidationError(
-          'Locality name letter should not repeat more them 2 time.');
-      return false;
-    }
-    if (!namePattern_business_next.hasMatch(cityName)) {
-      _showValidationError(
-          'City name letter should not repeat more than 2 times');
-      return false;
-    }
+    //   _showValidationError(
+    //       'Fields should not have continuously repeating letters.');
+    //   return false;
+    // }
 
     // Check if contact number follows the pattern
     if (!contactpattern.hasMatch(contactNumber)) {
@@ -204,6 +169,16 @@ class NextPage extends StatelessWidget {
       return false;
     }
 
+    // Check if fields have at least 3 characters (or numbers based on their type)
+    if (businessName.length < 3 ||
+        cityName.length < 3 ||
+        addressName.length < 3 ||
+        localityName.length < 3 ||
+        contactNumber.length < 3) {
+      _showValidationError(
+          'All fields should have at least 3 characters/numbers.');
+      return false;
+    }
     // Check if fields have at least 3 characters (or numbers based on their type)
     if (businessName.length < 3 ||
         cityName.length < 3 ||
